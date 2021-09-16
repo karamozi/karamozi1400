@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from OPTapp import views
+from accounts import views
 
 
 urlpatterns = [
@@ -22,6 +22,7 @@ urlpatterns = [
     path('table/delete_uploaded/',views.delete_uploaded,name='delete_uploaded'),
     path('table/delete_manuals/',views.delete_manuals,name='delete_manuals'),
     path('classDeleteAll/',views.classDeleteAll,name='classDeleteAll'),
-    path('finalize/',views.finalize,name='finalize'),
+    path('finalize/', views.finalize, name='finalize'),
+    path('finalize/<status>/', views.finalize, name='mip'),
     path('guide/',views.guide,name='guide'),
 ]
