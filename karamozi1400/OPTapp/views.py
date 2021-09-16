@@ -4,10 +4,10 @@ from django.http import HttpResponseRedirect, HttpResponse,JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from openpyxl import Workbook, load_workbook, styles
-from OPTapp.models import Schools, Classes, Table
+from accounts.models import Schools, Classes, Table
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
-from OPTapp.forms import UploadFileForm
+from accounts.forms import UploadFileForm
 from django.core import validators
 from django.conf import settings
 from django.urls import reverse
@@ -464,7 +464,7 @@ def upload(request):
                     num_of_session = 'یک روز در هفته'
                 else:
                     num_of_session = ''
-                item = Table(user=request.user,
+                Table.objects.create(user=request.user,
                              school=ws['E' + str(i[0])].value,
                              course=ws['G' + str(i[0])].value,
                              teacher=ws['N' + str(i[0])].value,
@@ -478,7 +478,6 @@ def upload(request):
                              second_end_time=second_end_time,
                              upload=True,
                              )
-                item.save()
 
                 upload_list = Table.objects.filter(
                     user=request.user, upload=True)
@@ -519,92 +518,86 @@ def delete_manuals(request):
 
 
 @login_required
-def finalize(request):
-    message = str()
+def finalize(request,status=None):
+    message = status
     if request.method == 'POST':
 
-        def Float(x):
-            return float(x)
-
-        ww = list(map(Float,request.POST.getlist('ww')))
+        ww = list(map(lambda x:float(x),request.POST.getlist('ww')))
         if sum(ww[i] for i in range(len(ww))) == 0:
             message = 'هر سه ضريب نمي‌تواند صفر باشد.'
-        else:
+            return redirect('mip',status=message)
 
-            courses = Table.objects.filter(user=request.user)
-            classes = Classes.objects.filter(user=request.user)
-            if len(classes) == 0:
-                message = 'هيچ كلاسي وارد نشده است.'
-            else:
+        courses = Table.objects.filter(user=request.user)
+        classes = Classes.objects.filter(user=request.user)
+        if len(classes) == 0:
+            message = 'هيچ كلاسي وارد نشده است.'
+            return redirect('mip', status=message)
 
-                I = range(len(courses))
-                K = range(len(classes))
-                J = range(322)
+        I = range(len(courses))
+        K = range(len(classes))
+        J = range(322)
 
 
             ########################## HH ########################
 
-                HH = [[0 for i in J] for y in courses]
+        HH = [[0 for i in J] for y in courses]
 
 
-                def day_compiler(x):
-                    if x == 'شنبه':
-                        return 0
-                    elif x == 'یکشنبه' or x == 'يكشنبه' or x == 'يك‌شنبه' or x == 'یک‌شنبه':
-                        return 1
-                    elif x == 'دوشنبه':
-                        return 2
-                    elif x == 'سه‌شنبه':
-                        return 3
-                    elif x == 'چهارشنبه':
-                        return 4
-                    elif x == 'پنجشنبه':
-                        return 5
-                    elif x == 'جمعه':
-                        return 6
+        def day_compiler(x):
+            if x == 'شنبه':
+                return 0
+            elif x == 'یکشنبه' or x == 'يكشنبه' or x == 'يك‌شنبه' or x == 'یک‌شنبه':
+                return 1
+            elif x == 'دوشنبه':
+                return 2
+            elif x == 'سه‌شنبه':
+                return 3
+            elif x == 'چهارشنبه':
+                return 4
+            elif x == 'پنجشنبه':
+                return 5
+            elif x == 'جمعه':
+                return 6
 
-                def time_index(x):
-                    return time_list.index(x)
+        def time_index(x):
+            return time_list.index(x)
 
-                for i in I:
-                    try:
-                        start = day_compiler(courses[i].first_day)*46+time_index(courses[i].first_start_time)
-                        end = day_compiler(courses[i].first_day)*46+time_index(courses[i].first_end_time)
-                        HH[i][start:end] = [1] * (end - start)
+        for i in I:
+            try:
+                start = day_compiler(courses[i].first_day)*46+time_index(courses[i].first_start_time)
+                end = day_compiler(courses[i].first_day)*46+time_index(courses[i].first_end_time)
+                HH[i][start:end] = [1] * (end - start)
 
-                        if courses[i].second_day:
-                            start = day_compiler(courses[i].second_day)*46+time_index(courses[i].second_start_time)
-                            end = day_compiler(courses[i].second_day)*46+time_index(courses[i].second_end_time)
-                            HH[i][start:end] = [1] * (end - start)
-                    except:
-                        message = 'زمان شروع يا پايان درس ' + courses[i].course + ' با شماره ' + str(i+1) +'در بازه زماني تعيين شده قرار ندارد جهت اصلاح آن به صورت دستي از لينك زير استفاده كنيد.'
-                        break
-
-                if not message:
+                if courses[i].second_day:
+                    start = day_compiler(courses[i].second_day)*46+time_index(courses[i].second_start_time)
+                    end = day_compiler(courses[i].second_day)*46+time_index(courses[i].second_end_time)
+                    HH[i][start:end] = [1] * (end - start)
+            except:
+                message = 'زمان شروع يا پايان درس ' + courses[i].course + ' با شماره ' + str(i+1) +'در بازه زماني تعيين شده قرار ندارد جهت اصلاح آن به صورت دستي از لينك زير استفاده كنيد.'
+                return redirect('mip', status=message)
 
 
                 #################### HHH ######################
 
-                    HHH = list()
-                    for i in I:
-                        HHH.append(sum(HH[i][j] for j in J))
+        HHH = list()
+        for i in I:
+            HHH.append(sum(HH[i][j] for j in J))
 
 
                 ###################### classcourse ######################
 
-                    classcourse = [[0 for k in K] for i in courses]
-
-                    for (i,k) in product(I,K):
-                        if courses[i].school == classes[k].school:
-                            classcourse[i][k] = 1
+        classcourse = [[0 for k in K] for i in courses]
+        for (i,k) in product(I,K):
+            if courses[i].school == classes[k].school:
+                classcourse[i][k] = 1
 
                 ########################## capa ##########################
 
-                    capa = [i.capacity for i in classes]
+        capa = [i.capacity for i in classes]
 
                 ########################  reg  ##########################
 
-                    reg = [i.signup_capacity for i in courses]
+        reg = [i.signup_capacity for i in courses]
 
                 ######################### ww ##############################
 
@@ -612,219 +605,216 @@ def finalize(request):
 
                 ####################### variables ##########################
 
-                    m = Model()
+        m = Model()
 
-                    x = [ [m.add_var(name="x({},{})".format(courses[i].course,k+1),var_type=BINARY) for k in K] for i in I ]
-                    r = [ m.add_var(name="r({})".format(k+1), var_type=BINARY) for k in K]
+        x = [ [m.add_var(name="x({},{})".format(courses[i].course,k+1),var_type=BINARY) for k in K] for i in I ]
+        r = [ m.add_var(name="r({})".format(k+1), var_type=BINARY) for k in K]
 
-                    y = [ [m.add_var(name="y({},{})".format(courses[i].course,k+1),lb=0) for k in K] for i in I]
-                    rr = m.add_var(name="rr",lb=0)
-                    cls = m.add_var(name="cls",lb=0)
-                    brk = m.add_var(name="brk",lb=0)
+        y = [ [m.add_var(name="y({},{})".format(courses[i].course,k+1),lb=0) for k in K] for i in I]
+        rr = m.add_var(name="rr",lb=0)
+        cls = m.add_var(name="cls",lb=0)
+        brk = m.add_var(name="brk",lb=0)
 
 
                 ########################### objective function ###############################
 
-                    m.objective = minimize( ww[0]*rr + ww[1]*brk - ww[2]*cls )
+        m.objective = minimize( ww[0]*rr + ww[1]*brk - ww[2]*cls )
 
                 ########################### Constraints ###############################
 
-                    for (j,k) in product(J,K):
-                        m += xsum( HH[i][j]*x[i][k] for i in I ) <= 1
+        for (j,k) in product(J,K):
+            m += xsum( HH[i][j]*x[i][k] for i in I ) <= 1
 
-                    for (i,k) in product(I,K):
-                        m += y[i][k] >= (int(reg[i])-int(capa[k])) * x[i][k]
+        for (i,k) in product(I,K):
+            m += y[i][k] >= (int(reg[i])-int(capa[k])) * x[i][k]
 
-                    for i in I:
-                        if HHH[i] > 0:
-                            m += xsum( x[i][k] for k in K ) == 1
+        for i in I:
+            if HHH[i] > 0:
+                m += xsum( x[i][k] for k in K ) == 1
 
-                    for (i,k) in product(I,K):
-                        m += x[i][k] <= r[k]
+        for (i,k) in product(I,K):
+            m += x[i][k] <= r[k]
 
-                    m += rr == xsum( r[k] for k in K )
+        m += rr == xsum( r[k] for k in K )
 
-                    m += cls == xsum( classcourse[i][k]*x[i][k] for i in I for k in K )
+        m += cls == xsum( classcourse[i][k]*x[i][k] for i in I for k in K )
 
-                    m+= brk == xsum( y[i][k] for i in I for k in K )
+        m+= brk == xsum( y[i][k] for i in I for k in K )
 
                     ###########################################################
-                    status = m.optimize()
-                    text = str()
-                    for v in m.vars:
-                        text += '<li>'+ v.name + ' = ' + str(v.x) +'</li>'
-                    text += '<li>'+'objective function' + ' = '  + str(m.objective_value) +'</li>'
-                    if status == OptimizationStatus.INFEASIBLE:
-                        message = 'جواب بهينه وجود ندارد.'
+        status = m.optimize()
 
-                    else:
-                        response = HttpResponse(content_type='application/vnd.ms-excel')
-                        response['Content-Disposition'] = 'attachment; filename=' + \
-                            'results' + '.xlsx'
+        if status == OptimizationStatus.INFEASIBLE:
+            message = 'جواب بهينه وجود ندارد.'
+            return redirect('mip', status=message)
+
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename=' + \
+            'results' + '.xlsx'
 
                     ####################### Tiemtable #########################
 
-                        solution_list = list()
-                        unique = list(dict.fromkeys([i.school for i in classes]))
+        solution_list = list()
+        unique = list(dict.fromkeys([i.school for i in classes]))
 
-                        for i in range(len(HH)):
-                            for k in range(len(HH[i])):
-                                if HH[i][k] == 1:
-                                    try:
-                                        HH[i][k] = unique.index(courses[i].school) + 1
-                                    except:
-                                        pass
-                        # print(HH[1])
-                        class_id = dict()
-                        index_list = list()
+        for i in range(len(HH)):
+            for k in range(len(HH[i])):
+                if HH[i][k] == 1:
+                    try:
+                        HH[i][k] = unique.index(courses[i].school) + 1
+                    except:
+                        pass
+        # print(HH[1])
+        class_id = dict()
+        index_list = list()
 
-                        for i in unique:
-                            filter_list = list(classes.filter(school=i))
-                            for j in filter_list:
-                                index = (unique.index(j.school) + 1) * 100 + filter_list.index(j) + 1
-                                index_list.append(index)
-                                class_id[j.pk] = index
+        for i in unique:
+            filter_list = list(classes.filter(school=i))
+            for j in filter_list:
+                index = (unique.index(j.school) + 1) * 100 + filter_list.index(j) + 1
+                index_list.append(index)
+                class_id[j.pk] = index
 
-                        for (i,k) in product(I,K):
-                            if x[i][k].x > 0:
-                                solution_list.append((courses[i].course,class_id[classes[k].pk],i))
+        for (i,k) in product(I,K):
+            if x[i][k].x > 0:
+                solution_list.append((courses[i].course,class_id[classes[k].pk],i))
 
-                        wb = Workbook()
-                        ws1 = wb.active
-                        ws1.title = 'Timetable'
+        wb = Workbook()
+        ws1 = wb.active
+        ws1.title = 'Timetable'
 
-                        days = [('شنبه','E1C39B','ECE98A'),
-                                ('يكشنبه','A1DD8B','A2F069'),
-                                ('دوشنبه','8BDDD0','69EAF0'),
-                                ('سه‌شنبه','8BC9DD','69C1F0'),
-                                ('چهارشنبه','8AA3EC','6992F0'),
-                                ('پنجشنبه','E1C39B','ECE98A'),
-                                ('جمعه','A1DD8B','A2F069')]
-                        def template(x):
-                            col = 3
-                            for day in days:
-                                for i in range(len(time_list)-1):
-                                    x.cell(row=1, column=col, value=day[0]).fill = PatternFill("solid", fgColor=day[1])
-                                    x.cell(row=2, column=col, value=time_list[i]+'-'+time_list[i+1]).fill = PatternFill("solid", fgColor=day[2])
-                                    col += 1
+        days = [('شنبه','E1C39B','ECE98A'),
+                ('يكشنبه','A1DD8B','A2F069'),
+                ('دوشنبه','8BDDD0','69EAF0'),
+                ('سه‌شنبه','8BC9DD','69C1F0'),
+                ('چهارشنبه','8AA3EC','6992F0'),
+                ('پنجشنبه','E1C39B','ECE98A'),
+                ('جمعه','A1DD8B','A2F069')]
+        def template(x):
+            col = 3
+            for day in days:
+                for i in range(len(time_list)-1):
+                    x.cell(row=1, column=col, value=day[0]).fill = PatternFill("solid", fgColor=day[1])
+                    x.cell(row=2, column=col, value=time_list[i]+'-'+time_list[i+1]).fill = PatternFill("solid", fgColor=day[2])
+                    col += 1
 
-                        template(ws1)
+        template(ws1)
 
-                        ws1.cell(row=2, column=1, value='رديف').fill = PatternFill("solid", fgColor='F0BD69')
-                        ws1.cell(row=2, column=2, value='نام درس').fill = PatternFill("solid", fgColor='F0BD69')
+        ws1.cell(row=2, column=1, value='رديف').fill = PatternFill("solid", fgColor='F0BD69')
+        ws1.cell(row=2, column=2, value='نام درس').fill = PatternFill("solid", fgColor='F0BD69')
 
-                        for i in range(len(HH)):
-                            col = 3
-                            ws1.cell(row=i+3, column=1, value=i+1)
-                            ws1.cell(row=i+3, column=2, value=solution_list[i][0])
-                            for j in range(len(HH[i])):
-                                if HH[i][j] != 0:
-                                    ws1.cell(row=i+3, column=col, value=solution_list[i][1])
-                                else:
-                                    ws1.cell(row=i+3, column=col, value=0)
-                                col += 1
+        for i in range(len(HH)):
+            col = 3
+            ws1.cell(row=i+3, column=1, value=i+1)
+            ws1.cell(row=i+3, column=2, value=solution_list[i][0])
+            for j in range(len(HH[i])):
+                if HH[i][j] != 0:
+                    ws1.cell(row=i+3, column=col, value=solution_list[i][1])
+                else:
+                    ws1.cell(row=i+3, column=col, value=0)
+                col += 1
 
 
                         #################### Classes #####################
-                        ws2 = wb.create_sheet('Classes')
-                        template(ws2)
+        ws2 = wb.create_sheet('Classes')
+        template(ws2)
 
-                        for i in range(len(index_list)):
-                            col = 3
-                            ws2.cell(row=i+3, column=1, value=index_list[i])
-                            items = [HH[j[2]] for j in solution_list if j[1] == index_list[i]]
-                            column_sums = [sum([row[i] for row in items]) for i in J]
-                            for j in range(len(column_sums)):
-                                ws2.cell(row=i+3, column=col, value=column_sums[j])
-                                col += 1
+        for i in range(len(index_list)):
+            col = 3
+            ws2.cell(row=i+3, column=1, value=index_list[i])
+            items = [HH[j[2]] for j in solution_list if j[1] == index_list[i]]
+            column_sums = [sum([row[i] for row in items]) for i in J]
+            for j in range(len(column_sums)):
+                ws2.cell(row=i+3, column=col, value=column_sums[j])
+                col += 1
 
                         ################### variables ####################
 
 
                         ################### X(i,k) ####################
 
-                        ws3 = wb.create_sheet('x(i,k)')
+        ws3 = wb.create_sheet('x(i,k)')
 
-                        ws3.cell(row=1, column=1, value='x(i,k)')
+        ws3.cell(row=1, column=1, value='x(i,k)')
 
-                        for k in K:
-                            ws3.cell(row=1,column=k+2,value=class_id[classes[k].pk])
-                        for i in I:
-                            ws3.cell(row=i+2,column=1,value=courses[i].course)
+        for k in K:
+            ws3.cell(row=1,column=k+2,value=class_id[classes[k].pk])
+        for i in I:
+            ws3.cell(row=i+2,column=1,value=courses[i].course)
 
-                        for (i,k) in product(I,K):
-                            ws3.cell(row=i+2,column=k+2,value=x[i][k].x)
+        for (i,k) in product(I,K):
+            ws3.cell(row=i+2,column=k+2,value=x[i][k].x)
 
                         ################### r(k) ####################
 
-                        ws4 = wb.create_sheet('r(k)')
-                        ws4.cell(row=1, column=1, value='r(k)')
+        ws4 = wb.create_sheet('r(k)')
+        ws4.cell(row=1, column=1, value='r(k)')
 
-                        r_solution = list()
+        r_solution = list()
 
-                        for k in K:
-                            r_solution.append((r[k].x,class_id[classes[k].pk]))
-                        r_solution.sort(key=lambda x:x[1])
+        for k in K:
+            r_solution.append((r[k].x,class_id[classes[k].pk]))
+        r_solution.sort(key=lambda x:x[1])
 
-                        k = 0
-                        for i in r_solution:
-                            ws4.cell(row=k+2, column=1, value=i[1])
-                            ws4.cell(row=k+2, column=2, value=i[0])
-                            k += 1
+        k = 0
+        for i in r_solution:
+            ws4.cell(row=k+2, column=1, value=i[1])
+            ws4.cell(row=k+2, column=2, value=i[0])
+            k += 1
 
                         # ################### Y(i,k) ####################
 
-                        ws5 = wb.create_sheet('y(i,k)')
+        ws5 = wb.create_sheet('y(i,k)')
 
-                        ws5.cell(row=1, column=1, value='y(i,k)')
+        ws5.cell(row=1, column=1, value='y(i,k)')
 
 
-                        for k in K:
-                            ws5.cell(row=1,column=k+2,value=class_id[classes[k].pk])
-                        for i in I:
-                            ws5.cell(row=i+2,column=1,value=courses[i].course)
+        for k in K:
+            ws5.cell(row=1,column=k+2,value=class_id[classes[k].pk])
+        for i in I:
+            ws5.cell(row=i+2,column=1,value=courses[i].course)
 
-                        for (i,k) in product(I,K):
-                            ws5.cell(row=i+2,column=k+2,value=y[i][k].x)
+        for (i,k) in product(I,K):
+            ws5.cell(row=i+2,column=k+2,value=y[i][k].x)
                         #
                         # ################### rr ####################
 
-                        ws6 = wb.create_sheet('rr,cls,brk,OBJ')
+        ws6 = wb.create_sheet('rr,cls,brk,OBJ')
 
 
-                        ws6.cell(row=1, column=1, value='rr')
-                        ws6.cell(row=2, column=1, value=rr.x)
+        ws6.cell(row=1, column=1, value='rr')
+        ws6.cell(row=2, column=1, value=rr.x)
 
                         # ################### cls ####################
                         #
-                        ws6.cell(row=1, column=3, value='cls')
-                        ws6.cell(row=2, column=3, value=cls.x)
+        ws6.cell(row=1, column=3, value='cls')
+        ws6.cell(row=2, column=3, value=cls.x)
                         #
                         # ################### brk ####################
                         #
-                        ws6.cell(row=1, column=5, value='brk')
-                        ws6.cell(row=2, column=5, value=brk.x)
+        ws6.cell(row=1, column=5, value='brk')
+        ws6.cell(row=2, column=5, value=brk.x)
                         #
                         # ############# objective fucntion ###############
                         #
-                        ws6.cell(row=1, column=7, value='objective function')
-                        ws6.cell(row=2, column=7, value=m.objective_value)
+        ws6.cell(row=1, column=7, value='objective function')
+        ws6.cell(row=2, column=7, value=m.objective_value)
 
-                        def center(x):
-                            for col in x.columns:
-                                for cell in col:
-                                    cell.alignment = styles.Alignment(horizontal='center')
+        # def center(x):
+        #     for col in x.columns:
+        #         for cell in col:
+        #             cell.alignment = styles.Alignment(horizontal='center')
 
-                        center(ws1)
-                        center(ws2)
-                        center(ws3)
-                        center(ws4)
-                        center(ws5)
-                        center(ws6)
+        # center(ws1)
+        # center(ws2)
+        # center(ws3)
+        # center(ws4)
+        # center(ws5)
+        # center(ws6)
 
 
-                        wb.save(response)
-                        return response
+        wb.save(response)
+        return response
 
 
 
