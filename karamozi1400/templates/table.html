@@ -1,0 +1,498 @@
+{% extends "base.html" %}
+
+{% block style %}
+
+<style>
+
+  .borrow {
+    border-bottom: 2px solid black;
+  }
+
+  /* .submit-button {
+    border: none;
+    background-color: white;
+  } */
+
+  .icons {
+    visibility: hidden;
+  }
+
+  .table-row:hover .icons {
+    visibility: visible;
+  }
+
+  .table-row:hover {
+    background: #DADAD6;
+  }
+
+  .first-row {
+    font-weight: bold;
+  }
+
+  .rows {
+    max-height: 450px;
+    overflow-y: overlay
+  }
+
+  .submit-button {
+    border: none;
+    background-color: white;
+  }
+
+  .custom_option {
+    display: none;
+  }
+</style>
+
+{% endblock%}
+
+{% block content %}
+
+<h1 class="object_id d-none">{{id}}</h1>
+<br>
+<br>
+<div class="container d-flex justify-content-between">
+  <div class="previous-page">
+    <a href="{% url 'upload' %}">
+      << آپلود فايل</a>
+  </div>
+
+
+  <div class="next-page">
+    <a href="{% url 'finalize' %}">نهایی کردن >></a>
+  </div>
+
+
+</div>
+<br>
+
+
+<div class="container w-100 wrapper d-flex flex-column bor">
+  <div class="title d-flex justify-content-center p-5 borb mb-3">
+    <div class="align-self-center">
+      <h2>وارد كردن درس‌ها</h2>
+    </div>
+  </div>
+
+  <div class="guide p-1 text-right bor mb-3">
+    <div class="p-2 bor">
+      <h3>راهنما</h3>
+      <p>در این قسمت می‌توانید درس‌ها را وارد کنید. کافیست از فرم زیر اطلاعات مربوطه را وارد کنید و گزینه ثبت را بزنید. همچنین در جدول زیر درس‌های آپلود شده نمايش داده مي‌شود. بعلاوه امکان حذف و تغییر هر گزینه وجود دارد. در آخر روي دكمه نهايي كردن
+        كليك كنيد.
+
+      </p>
+    </div>
+
+  </div>
+
+  <div class="d-flex flex-column bor">
+    <form id="form" class="d-flex flex-column justify-content-center w-100" action="{% url 'table' %}" method="post">
+      <input class="input_id" type="hidden" name="id" value="">
+      {% csrf_token %}
+      <div class="form-title d-flex justify-content-center py-3 borb" id='input_form'>
+        <div class="align-self-center">
+          <h5>فرم درس‌ها</h5>
+        </div>
+
+      </div>
+      <div class="form-content d-flex text-center py-2">
+
+        <div class="col-6 right borl">
+          <div class="d-flex school borb">
+            <div class="col-6 py-2">نام دانشكده</div>
+            <div class="col-6 py-2">
+              <select id="school" name="school" class="w-100 school">
+                <option class="add_school custom_option"></option>
+                {% if selected_schools %}
+                {% for school in selected_schools %}
+                <option>{{school}}</option>
+                {% endfor %}
+                {% else %}
+                <option>null</option>
+                {% endif %}
+              </select>
+            </div>
+          </div>
+          <div class="d-flex course borb">
+            <div class="col-6 py-2">نام درس</div>
+            <div class="col-6 py-2">
+              <input class="w-100 course" type="text" name="course">
+            </div>
+          </div>
+          <div class="d-flex num borb">
+            <div class="col-6 py-2">نام استاد</div>
+            <div class="col-6 py-2">
+              <input class="w-100 teacher" type="text" name="teacher">
+            </div>
+          </div>
+          <div class="d-flex capacity borb">
+            <div class="col-6 py-2">ظرفيت ثبت نامي</div>
+            <div class="col-6 py-2">
+              <input class="w-100 signup_capacity" type="number" name="signup_capacity" min='0' class="w-100" value="0">
+            </div>
+          </div>
+          <div class="d-flex num">
+            <div class="col-6 py-2">تعداد جلسات در هفته</div>
+            <div class="col-6 py-2">
+              <select name="num_of_session" class="w-100 number_of_session">
+                <option class="add_num custom_option"></option>
+                <option>يك روز در هفته</option>
+                <option>دو روز در هفته</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+        <div class="col-6 left d-flex flex-column justify-content-center">
+          <div class="d-flex first-day bor">
+            <div class="col-6 py-2">اولين روز</div>
+            <div class="col-6 py-2">
+              <select name="first_day" class="w-100">
+                <option class="add_first_day custom_option"></option>
+                <option>شنبه</option>
+                <option>یکشنبه</option>
+                <option>دوشنبه</option>
+                <option>سه‌شنبه</option>
+                <option>چهارشنبه</option>
+              </select>
+            </div>
+          </div>
+          <div class="d-flex new_first_daytime mb-3 borb borl borr">
+            <div class="col-6 d-flex py-2 borl">
+              <div class="col-6">زمان شروع</div>
+              <div class="col-6">
+                <select name="first_start_time" class="w-100">
+                  <option class="add_first_start_time custom_option"></option>
+                  {% for time in time_list %}
+                  <option>{{time}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-6 d-flex py-2">
+              <div class="col-6">زمان پايان</div>
+              <div class="col-6">
+                <select name="first_end_time" class="w-100">
+                  <option class="add_first_end_time custom_option"></option>
+                  {% for time in time_list %}
+                  <option>{{time}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex second-day bor">
+            <div class="col-6 py-2">دومين روز</div>
+            <div class="col-6 py-2">
+              <select name="second_day" class="w-100">
+                <option class="add_second_day custom_option"></option>
+                <option>شنبه</option>
+                <option>يك‌شنبه</option>
+                <option>دوشنبه</option>
+                <option>سه‌شنبه</option>
+                <option>چهارشنبه</option>
+              </select>
+            </div>
+          </div>
+          <div class="d-flex second_time borb borl borr">
+            <div class="col-6 d-flex py-2 borl">
+              <div class="col-6">زمان شروع</div>
+              <div class="col-6">
+                <select name="second_start_time" class="w-100">
+                  <option class="add_second_start_time custom_option"></option>
+                  {% for time in time_list %}
+                  <option>{{time}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-6 d-flex py-2">
+              <div class="col-6">زمان پايان</div>
+              <div class="col-6">
+                <select name="second_end_time" class="w-100">
+                  <option class="add_second_end_time custom_option"></option>
+                  {% for time in time_list %}
+                  <option>{{time}}</option>
+                  {% endfor %}
+                  <option>20:00</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="form-submit d-flex justify-content-center py-2 bort">
+        <div class="align-self-center">
+          <button type="submit" class="submit-button btn btn-outline-primary save-button">ثبت</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <br>
+  <div class="content d-flex flex-column justify-content-center py-4">
+
+    <div class="rows-title d-flex justify-content-center p-3">
+      <div class="align-self-center">
+        <h5>جدول كلاس‌ها</h5>
+      </div>
+
+    </div>
+
+    <!-- ####################### -->
+
+    {% if table_list %}
+
+    <div class="excel-download d-flex justify-content-center pb-4">
+
+      <div class="align-self-center mr-2">
+        <a href="{% url 'delete_all' %}" class="btn btn-outline-danger">حذف همه</a>
+      </div>
+
+      <div class="align-self-center mr-2">
+        <a href="{% url 'delete_uploaded' %}" class="btn btn-outline-danger">حذف آپلود شده‌ها</a>
+      </div>
+
+      <div class="align-self-center mr-2">
+        <a href="{% url 'delete_manuals' %}" class="btn btn-outline-danger">حذف ثبت شده‌ها (دستی)</a>
+      </div>
+    </div>
+
+    {% endif %}
+
+    <div class="first-row text-center d-flex w-100 borrow bort borl borr" id="table">
+      <div class=" d-flex justify-content-center px-1" style="visibility:hidden">
+        <div class="align-self-center"><a href=""><i class="fa fa-trash-o buttons text-danger"></i></a></div>
+        <div class="align-self-center mr-2"><a><i class="fa fa-pencil buttons edit" style="color: blue;"></i></a></div>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <div class="align-self-center">رديف</div>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <div class="align-self-center">دانشکده</div>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <div class="align-self-center">نام درس</div>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <div class="align-self-center">تعداد جلسات در هفته</div>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <div class="align-self-center">نام استاد</div>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <div class="align-self-center">اولین روز</div>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <div class="align-self-center">ساعت شروع</div>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <div class="align-self-center">ساعت پایان</div>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <div class="align-self-center">دومین روز</div>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <div class="align-self-center">ساعت شروع</div>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <div class="align-self-center">ساعت پایان</div>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <div class="align-self-center">ظرفیت ثبت نامی</div>
+      </div>
+
+      <!-- <div class="col d-flex justify-content-center px-1">
+          <div class="align-self-center"><a><i class="fa fa-pencil buttons edit" style="color: blue;"></i></a></div>
+        </div> -->
+    </div>
+
+    <div class="rows borb borl borr d-flex flex-column" id='content'>
+      {% if table_list %}
+      {% for i in table_list %}
+      <p class="d-none primary_key">{{i.id}}</p>
+      <!-- ################################   content row    #################################### -->
+      <div class="table-row text-center d-flex w-100 borb" id="{{i.pk}}">
+        <div class="d-flex justify-content-center px-1 icons">
+          <div class="align-self-center delete-icon"><a href="{% url 'delete_table' pk=i.pk %}"><i class="fa fa-trash-o buttons text-danger"></i></a></div>
+          <div class="align-self-center mr-2 edit-icon"><a><i class="fa fa-pencil buttons edit" style="color: blue;"></i></a></div>
+        </div>
+        <div class="col d-flex justify-content-center">
+          <div class="align-self-center row-id"></div>
+        </div>
+        <div class="col d-flex justify-content-center school">
+          <div class="align-self-center">{{i.school}}</div>
+        </div>
+        <div class="col d-flex justify-content-center">
+          <div class="align-self-center">{{i.course}}</div>
+        </div>
+        <div class="col d-flex justify-content-center">
+          <div class="align-self-center">{{i.num_of_session}}</div>
+        </div>
+        <div class="col d-flex justify-content-center">
+          <div class="align-self-center">{{i.teacher}}</div>
+        </div>
+        <div class="col d-flex justify-content-center">
+          <div class="align-self-center">{{i.first_day}}</div>
+        </div>
+        <div class="col d-flex justify-content-center">
+          <div class="align-self-center">{{i.first_start_time}}</div>
+        </div>
+        <div class="col d-flex justify-content-center">
+          <div class="align-self-center">{{i.first_end_time}}</div>
+        </div>
+        <div class="col d-flex justify-content-center">
+          <div class="align-self-center">{{i.second_day}}</div>
+        </div>
+        <div class="col d-flex justify-content-center">
+          <div class="align-self-center">{{i.second_start_time}}</div>
+        </div>
+        <div class="col d-flex justify-content-center">
+          <div class="align-self-center">{{i.second_end_time}}</div>
+        </div>
+        <div class="col d-flex justify-content-center">
+          <div class="align-self-center">{{i.signup_capacity}}</div>
+        </div>
+
+        <p class="d-none primary_key">{{i.pk}}</p>
+      </div>
+
+      <!-- ######################################################################## -->
+      {% endfor %}
+      {% else %}
+      <h4 class="text-danger mx-auto py-4">درسی اضافه نشده است</h4>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="navigation-buttons d-flex justify-content-between w-100 bor mt-3 p-3 mb-3">
+    <div class="previous-button">
+      <a href="{% url 'upload' %}" class="btn btn-outline-success"><i class="fa fa-chevron-right" aria-hidden="true"></i> مرحله قبل</a>
+    </div>
+
+    <div class="previous-button">
+      <a href="{% url 'finalize' %}" class="btn btn-outline-success">نهایی کردن <i class="fa fa-chevron-left" aria-hidden="true"></i></a>
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<br>
+<br>
+
+
+<div class="container d-flex justify-content-between">
+  <div class="previous-page">
+    <a href="{% url 'upload' %}">
+      << آپلود فايل</a>
+  </div>
+
+  <div class="next-page">
+    <a href="{% url 'finalize' %}">نهایی کردن >></a>
+  </div>
+
+</div>
+
+<br>
+<br>
+<br>
+
+
+<script>
+  $('.second-day, .second_time').css('visibility', 'hidden')
+  $('.number_of_session').on('change', function() {
+    if ($('.number_of_session').val() === "يك روز در هفته") {
+      $('.second-day, .second_time').css('visibility', 'hidden')
+    } else {
+      $('.second-day, .second_time').css('visibility', 'visible')
+    }
+  })
+
+  var items = $('.row-id');
+  var num = 1
+  for (let i = 0; i < items.length; i++) {
+    items[i].innerHTML = num;
+    num = num + 1;
+  }
+
+  $('.edit-icon').click(function() {
+
+
+    document.getElementById('input_form').scrollIntoView({
+      behavior: 'smooth'
+    });
+    const school = $(this).parent().parent().children()[2].innerText;
+    const course = $(this).parent().parent().children()[3].innerText;
+    const num = $(this).parent().parent().children()[4].innerText;
+    const teacher = $(this).parent().parent().children()[5].innerText;
+    const first_day = $(this).parent().parent().children()[6].innerText;
+    const first_start_time = $(this).parent().parent().children()[7].innerText;
+    const first_end_time = $(this).parent().parent().children()[8].innerText;
+    const second_day = $(this).parent().parent().children()[9].innerText;
+    const second_start_time = $(this).parent().parent().children()[10].innerText;
+    const second_end_time = $(this).parent().parent().children()[11].innerText;
+    const capacity = $(this).parent().parent().children()[12].innerText;
+    const primary_key = $(this).parent().parent().children()[13].innerText;
+
+    $('.custom_option').css('display', 'block')
+
+    $('.add_school').text(school)
+    $('.course').val(course)
+    $('.teacher').val(teacher)
+    $('.signup_capacity').val(capacity)
+    $('.add_num').text(num)
+    $('.add_first_day').text(first_day)
+    $('.add_first_start_time').text(first_start_time)
+    $('.add_first_end_time').text(first_end_time)
+    $('.add_second_day').text(second_day)
+    $('.add_second_start_time').text(second_start_time)
+    $('.add_second_end_time').text(second_end_time)
+    $('.input_id').val(primary_key)
+
+
+    if (num === 'دو روز در هفته') {
+      $('.second-day, .second_time').css('visibility', 'visible')
+    } else {
+      $('.second-day, .second_time').css('visibility', 'hidden')
+    }
+
+    $('.save-button').addClass('btn-outline-warning').text('ثبت تغييرات')
+
+  })
+
+
+  $('.number_of_session').on('change', function() {
+    if ($('.number_of_session').val() === "يك روز در هفته") {
+      $('.second-day, .second_time').css('visibility', 'hidden')
+    } else {
+      $('.second-day, .second_time').css('visibility', 'visible')
+    }
+  })
+
+
+
+</script>
+
+<script>
+  $(window).scroll(function() {
+    sessionStorage.scrollPos = $(window).scrollTop();
+  });
+  var init = function() {
+    $(window).scrollTop(sessionStorage.scrollPos || 0)
+  };
+  window.onload = init;
+
+</script>
+
+{% if id %}
+<script>
+  window.location.hash = '#' + $('.object_id').text();
+</script>
+{% endif %}
+
+
+
+{% endblock%}

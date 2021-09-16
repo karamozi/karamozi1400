@@ -1,0 +1,52 @@
+.select {
+  background-color: #0066CC;
+  color: white;
+}
+
+.selected_schools:hover, .remaining_schools:hover, .school_list_item:hover, .all, .edit:hover {
+  cursor: pointer
+}
+
+
+.school_list_item:hover{
+  cursor: pointer;
+}
+
+.show {
+  display: block;
+}
+
+.row_options {
+  visibility:hidden;
+}
+
+tr:hover td.row_options {
+  visibility: visible;
+  background-color: white
+}
+
+.bor {
+  border: 1px solid black;
+}
+
+.bort {
+  border-top: 1px solid black;
+}
+
+.borb {
+  border-bottom: 1px solid black;
+}
+
+.borr {
+  border-right: 1px solid black;
+}
+
+.borl {
+  border-left: 1px solid black;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

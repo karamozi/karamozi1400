@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+
+{% block style %}
+
+<style>
+
+  .objects-list div {
+    height: auto;
+  }
+
+  .first-row div {
+    font-weight: bold;
+  }
+
+  .checkbox {
+    width: 17px;
+    height: 17px;
+
+  }
+
+  .objects-list {
+    height: 450px;
+    overflow-y: overlay;
+  }
+
+  .check-filter {
+    display: none;
+  }
+
+  .option-buttons {
+    width: 100px;
+  }
+
+  .option-buttons:hover {
+    cursor: pointer;
+  }
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+<br>
+<br>
+
+<div class="container d-flex justify-content-between">
+  <div class="previous-page">
+    <a href="{% url 'class_selection' %}">
+      << كلاس‌ها</a>
+  </div>
+
+  <div class="next-page">
+    <a href="{% url 'table' %}">درس‌ها >></a>
+  </div>
+
+</div>
+<br>
+
+
+<div class="container bor">
+  <div class="d-flex flex-column wrapper w-100 mx-auto mb-3">
+    <div class="title d-flex justify-content-center borb mb-3">
+      <div class="align-self-center p-5">
+        <h2 class="title-text">آپلود گزارش 110</h2>
+      </div>
+
+    </div>
+
+    <div class="guide mb-3 text-right pr-3">
+      <p> برای مشاهده راهنمای این بخش <span><a href="{% url 'guide' %}"> اینجا </a></span>کلیک کنید </p>
+      <!-- <div class="container p-3 bor">
+        <h3>راهنما</h3>
+        <p>در اين مرحله مي‌توانيد گزارش 110 را از قسمت زیر آپلود کنید. در قسمت پيش‌نمايش اطلاعات فايل آپلود شده نمايش داده مي‌شود. از کنار هر سطر می‌توانید آن سطر را انتخاب کنید و با انتخاب هر سطر آن سطر حذف می‌شود. در نهایت به مرحله بعد بروید. اين
+          مرحله اختياري مي‌باشد و براي وارد كردن درس‌ها به صورت دستي مي‌توانيد در مرحله بعد اقدام كنيد.</p>
+        <p class="text-danger">لازم به ذکر است که اگر فایل جدیدی را آپلود کنید درس‌های قبلی به کلی حذف می‌شوند. در صورت نیاز به این درس‌ها،‌ در هنگام آپلود فایل می‌توانید گزینه اضافه کردن به جدول قبلی را بزنید تا از این امر جلوگیری شود.</p>
+      </div> -->
+    </div>
+
+    <div class="upload-file d-flex flex-column jusfity-content-center container p-3 bor">
+      <div class="align-self-start">
+        <h3>آپلود فایل</h3>
+      </div>
+
+      <div class="mx-auto text-right align-self-center p-4 bor">
+
+        <form action="{% url 'upload' %}" method="POST" enctype="multipart/form-data" class="my-auto">
+          {% csrf_token %}
+
+
+          {% for field in form %}
+          <label class="form-label" for="{{ field.auto_id }}">{{ field.label }}</label>
+          {{ field }}
+          {% endfor %}
+
+          <input type="submit" value="Upload">
+          {% if upload_list %}
+          <div class="delete-previous mt-3">
+            <input id='continue' type="checkbox" name="continue" value="True">
+            <label for="continue" class="active">اضافه كردن به جدول قبلي</label>
+          </div>
+          {% endif %}
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <div id='preview' class="wrapper d-flex flex-column p-3 bor">
+    <div class="header d-flex justify-content-start">
+      <div class="header-title align-self-start pb-3">
+        <h3 id="goto">پیش نمایش</h3>
+      </div>
+    </div>
+
+    <div class="content d-flex flex-column text-center bor">
+      {% if upload_list %}
+      <div class="first-row d-flex justify-content-center borb">
+
+        <div class="col-1 center">
+          <div class="">
+            <input type="checkbox" class="check_all checkbox">
+          </div>
+        </div>
+
+        <div class="col-1 d-flex justify-content-center">
+          <div class="align-self-center">گروه آموزشی</div>
+        </div>
+        <div class="col-1 d-flex justify-content-center">
+          <div class="align-self-center">نام درس</div>
+        </div>
+        <div class="col-1 d-flex justify-content-center">
+          <div class="align-self-center">نام استاد</div>
+        </div>
+        <div class="col-1 d-flex justify-content-center">
+          <div class="align-self-center">اولین روز</div>
+        </div>
+        <div class="col-1 d-flex justify-content-center">
+          <div class="align-self-center">زمان شروع</div>
+        </div>
+        <div class="col-1 d-flex justify-content-center">
+          <div class="align-self-center">زمان پایان</div>
+        </div>
+        <div class="col-1 d-flex justify-content-center">
+          <div class="align-self-center">دومین روز</div>
+        </div>
+        <div class="col-1 d-flex justify-content-center">
+          <div class="align-self-center">زمان شروع</div>
+        </div>
+        <div class="col-1 d-flex justify-content-center">
+          <div class="align-self-center">زمان پایان</div>
+        </div>
+        <div class="col-1 d-flex justify-content-center">
+          <div class="align-self-center">ظرفیت</div>
+        </div>
+
+        <div class="col-1"></div>
+
+
+
+      </div>
+
+
+      <div class="objects-list-wrapper">
+        <form action="{% url 'mark_table' %}" method="post">
+          {% csrf_token %}
+          <div class="objects-list d-flex flex-column borb">
+
+            {% for i in upload_list %}
+            <div class="objects-list-row d-flex borb">
+              <div class="col-1 d-flex justify-content-center borl">
+                <div class="align-self-center" style="height:auto;">
+
+                  <input type="checkbox" class="checkbox" name="checkbox" value="{{i.pk}}" {% if i.select == True %} checked {% endif %}>
+
+
+                </div>
+              </div>
+              <div class="col-1 d-flex justify-content-center borl">
+                <div class="align-self-center">{{i.school}}</div>
+              </div>
+              <div class="col-1 d-flex justify-content-center borl">
+                <div class="align-self-center">{{i.course}}</div>
+              </div>
+              <div class="col-1 d-flex justify-content-center borl">
+                <div class="align-self-center">{{i.teacher}}</div>
+              </div>
+              <div class="col-1 d-flex justify-content-center borl">
+                <div class="align-self-center">{{i.first_day}}</div>
+              </div>
+              <div class="col-1 d-flex justify-content-center borl">
+                <div class="align-self-center">{{i.first_start_time}}</div>
+              </div>
+              <div class="col-1 d-flex justify-content-center borl">
+                <div class="align-self-center">{{i.first_end_time}}</div>
+              </div>
+              <div class="col-1 d-flex justify-content-center borl">
+                <div class="align-self-center">{{i.second_day}}</div>
+              </div>
+              <div class="col-1 d-flex justify-content-center borl">
+                <div class="align-self-center">{{i.second_start_time}}</div>
+              </div>
+              <div class="col-1 d-flex justify-content-center borl">
+                <div class="align-self-center">{{i.second_end_time}}</div>
+              </div>
+              <div class="col-1 d-flex justify-content-center borl">
+                <div class="align-self-center">{{i.signup_capacity}}</div>
+              </div>
+              <div class="col-1 d-flex justify-content-center borl" style="visibility:hidden;"></div>
+            </div>
+            {% endfor %}
+
+          </div>
+
+
+
+          <div class="navigation-buttons d-flex justify-content-between w-100 bor mt-3 p-3">
+            <div class="previous-button">
+              <a href="{% url 'class_selection' %}" class="btn btn-outline-success"><i class="fa fa-chevron-right" aria-hidden="true"></i> مرحله قبل</a>
+            </div>
+
+            <div>
+              <button type="submit" class="btn btn-outline-danger delete-mark">حذف درس‌هاي انتخاب شده</button>
+            </div>
+
+            <div class="previous-button">
+              <a href="{% url 'table' %}" class="btn btn-outline-success">مرحله بعد <i class="fa fa-chevron-left" aria-hidden="true"></i></a>
+            </div>
+
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+
+    {% else %}
+    <div class="center">
+      <div class="">
+        <h5 class="text-danger p-4">درسي براي نمايش وجود ندارد</h5>
+      </div>
+
+    </div>
+
+    <div class="navigation-buttons d-flex justify-content-between w-100 bor mt-3 p-3">
+      <div class="previous-button">
+        <a href="{% url 'class_selection' %}" class="btn btn-outline-success"><i class="fa fa-chevron-right" aria-hidden="true"></i><i class="fa fa-chevron-right" aria-hidden="true"></i> مرحله قبل</a>
+      </div>
+
+      <div class="previous-button">
+        <a href="{% url 'table' %}" class="btn btn-outline-success">مرحله بعد <i class="fa fa-chevron-left" aria-hidden="true"></i><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
+      </div>
+
+    </div>
+
+    {% endif %}
+
+
+
+
+  </div>
+
+
+</div>
+
+<br>
+<div class="container d-flex justify-content-between">
+  <div class="previous-page">
+    <a href="{% url 'class_selection' %}"><< كلاس‌ها</a>
+  </div>
+
+  <div class="next-page">
+    <a href="{% url 'table' %}">درس‌ها >></a>
+  </div>
+
+</div>
+<br>
+<br>
+<br>
+
+
+
+<script>
+  $(".custom-file-input").on("change", function() {
+    var fileName = $(this).val().split("\\").pop();
+    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+  });
+
+  $('.check_all').on('click', function() {
+    if ($(this).prop('checked')) {
+      $('input.checkbox').prop('checked', true);
+    } else {
+      $('input.checkbox').prop('checked', false);
+    }
+  })
+
+</script>
+
+  <script>
+    $(window).scroll(function() {
+      sessionStorage.scrollPos = $(window).scrollTop();
+    });
+    var init = function() {
+      $(window).scrollTop(sessionStorage.scrollPos || 0)
+    };
+    window.onload = init;
+
+  </script>
+
+
+
+{% endblock %}

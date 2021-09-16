@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block style %}
+<style>
+
+  .coef {
+    border-radius:20px;
+    border: 1px solid #c4c4c4;
+    background-color:#fcfcfc
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<br>
+<br>
+<div class="container d-flex justify-content-between w-50">
+  <div class="previous-page">
+    <a href="{% url 'table' %}"><< درس‌ها</a></div>
+
+
+  <div class="next-page">
+
+  </div>
+
+
+</div>
+<br>
+<div class="container d-flex flex-column justify-content-center w-50 bor">
+
+
+    <div class="title py-5 text-center borb">
+      <h2>نهایی کردن</h2>
+    </div>
+
+    <div class="schools text-right p-2">
+      <h5>دانشکده‌های انتخابی: {{schools|length}} دانشکده</h5>
+      <span>نام دانشکده‌ها: </span>
+    {% for i in schools %}
+      <span>{{i.school}} ,</span>
+    {% endfor %}
+
+      <p class="m-0"><a href="{% url 'school_selection' %}">مشاهده دانشکده‌ها</a></p>
+      <hr class="m-0">
+    </div>
+    <div class="classes text-right p-2">
+      <h5>کلاس‌های ثبت شده: {{classes|length}} کلاس</h5>
+
+      <p class="m-0"><a href="{% url 'class_selection' %}">مشاهده کلاس‌ها</a></p>
+      <hr class="m-0">
+    </div>
+    <div class="courses text-right p-2">
+      <h5>درس‌های ثبت شده: {{courses|length}} درس</h5>
+
+      <p class="m-0"><a href="{% url 'table' %}">مشاهده درس‌ها</a></p>
+      <hr class="m-0">
+    </div>
+
+    <div class="download text-right p-3 d-flex justify-content-center pb-3 borb">
+      <div class="align-self-center ml-2">
+        <a href="{% url 'create_excel' %}" download class="btn btn-outline-primary download">دانلود فايل اكسل</a>
+      </div>
+
+    </div>
+
+    <div class="text-right p-3">
+      <h5>ضريب اهميت اهداف سه گانه</h5>
+    </div>
+    <div class="text-right mb-4 p-2 container w-50 coef">
+      <form class="" action="{% url 'finalize' %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="w1">تعداد كلاس‌ها</label>
+          <input id="w1" type="number" name="ww" value="0" min="0" step="0.1" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="w2">مجموع انحرافات ظرفيت</label>
+          <input id="w2" type="number" name="ww" value="0" min="0" step="0.1" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="w3">لزوم تشكيل هر كلاس در دانشكده خود</label>
+          <input id="w3" type="number" name="ww" value="0" min="0" step="0.1" class="form-control">
+        </div>
+        <div class="text-center mt-2">
+          <button type="submit" class="btn btn-outline-success download">دانلود برنامه بهينه</button>
+        </div>
+      </form>
+    </div>
+
+    {% if message %}
+    <div class="message text-center px-4 pb-4 w-75 m-auto">
+      <p class="text-danger m-0">{{message}}</p>
+      {% if 'اصلاح' in message %}
+      <a href="{% url 'table' %}">اصلاح زمان درس</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="navigation-buttons d-flex justify-content-start w-100 p-3 mb-3 bort">
+      <div class="previous-button">
+        <a href="{% url 'table' %}" class="btn btn-outline-success"><i class="fa fa-chevron-right" aria-hidden="true"></i> بازگشت</a>
+      </div>
+
+
+    </div>
+
+</div>
+
+<br>
+<br>
+<br>
+
+<script>
+  $(window).scroll(function() {
+    sessionStorage.scrollPos = $(window).scrollTop();
+  });
+  var init = function() {
+    $(window).scrollTop(sessionStorage.scrollPos || 0)
+  };
+  window.onload = init;
+
+</script>
+
+{% endblock%}

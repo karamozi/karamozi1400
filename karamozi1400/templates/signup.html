@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5 mx-auto w-50 ">
+
+
+  <form class="text-right w-50 mx-auto" action="{% url 'signup' %}" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="username">نام کاربری</label>
+      <input class="form-control" type="text" id="username" name="username" placeholder="Username" value="{{username}}">
+      <div class="invalid-feedback username_message">{{username_message}}</div>
+    </div>
+
+    <div class="form-group">
+      <label for="email">ایمیل</label>
+      <input class="form-control" class="d-inline-block" type="text" id="email" name="email" placeholder="Email" value="{{email}}">
+      <div class="invalid-feedback email_message">{{email_message}}</div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">رمز عبور</label>
+      <input class="form-control" type="password" id="password" name="password" placeholder="Password" value="{{password}}">
+      <div class="invalid-feedback password_message">{{password_message}}</div>
+    </div>
+
+    <div class="form-group">
+      <label for="confirm_password">تایید رمز عبور</label>
+      <input class="form-control" type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password" value="{{confirm_password}}">
+      <div class="invalid-feedback confirm_password_message">{{confirm_password_message}}</div>
+    </div>
+
+
+    <input type="submit" value="Sign Up" class="btn btn-outline-dark mx-auto d-block btn-block">
+
+
+  </form>
+
+</div>
+
+<script>
+  if ($('.username_message').text() === '') {
+    $('#username').addClass('is-valid')
+  } else {
+    $('#username').before().addClass('is-invalid')
+  }
+
+  if ($('.email_message').text() === '') {
+    $('#email').addClass('is-valid')
+  } else {
+    $('#email').before().addClass('is-invalid')
+  }
+
+  if ($('.password_message').text() === '') {
+    $('#password').before().addClass('is-valid')
+  } else {
+    $('#password').before().addClass('is-invalid')
+  }
+
+  if ($('.confirm_password_message').text() === '') {
+    $('#confirm_password').before().addClass('is-valid')
+  } else {
+    $('#confirm_password').before().addClass('is-invalid')
+  }
+</script>
+
+
+
+{% endblock %}

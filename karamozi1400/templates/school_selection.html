@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block style%}
+<style>
+
+  .total-schools,
+  .selected-schools {
+    width: 40%;
+  }
+
+  .total-schools-list,
+  .selected-schools-list {
+    height: 300px;
+    overflow-y: auto;
+    direction: rtl;
+  }
+
+  .buttons div {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+
+
+  .item:hover,
+  .left-arrow:hover,
+  .right-arrow:hover {
+    cursor: pointer
+  }
+
+  .item {
+    border-bottom: 0.5px solid #BDBDB7;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+
+
+<body>
+
+  <br>
+  <br>
+  <div class="container">
+    <div class="container w-75 d-flex justify-content-between">
+      <div class="previous-page">
+        <a href="#"></a>
+      </div>
+
+      <div class="previous-page">
+        <a href="{% url 'class_selection' %}">كلاس‌ها >></a>
+      </div>
+
+    </div>
+  </div>
+  <br>
+
+
+  <div class="container">
+    <div class="d-flex flex-column wrapper w-75 mx-auto bor">
+      <div class="title d-flex justify-content-center bor">
+        <div class="title-text align-self-center p-5">
+          <h2>انتخاب دانشكده</h2>
+        </div>
+      </div>
+      <div class="guide p-1 bor">
+        <div class="container text-right bor">
+          <h3>راهنما</h3>
+          <p>
+            برای انتخاب دانشکده، هر تعداد از دانشکده‌‌های سمت راست را انتخاب کرده و فلش سمت چپ را بزنید. همچنین برای حذف دانشکده‌، دانشکده مد نظر را از سمت چپ انتخاب کرده و فلش سمت راست را بزنید. بعد از اتمام تغییرات به مرحله بعد برويد.
+          </p>
+        </div>
+      </div>
+      <div class="box d-flex justify-content-around p-3 bor">
+        <div class="total-schools bor">
+          <div class="box-title text-center bor">
+            <h5>کل دانشكده‌ها</h5>
+          </div>
+          <div class="total-schools-list overflow-auto text-right bor">
+            <div class="start-right"></div>
+            {% for row in remaining_schools %}
+            <div class="px-2 total-schools-item item">
+              <p class=' m-0'>{{row}}</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="align-self-center">
+          <div class="left-arrow">
+            <i class="fa fa-long-arrow-left text-secondary" style="font-size: 50px;" aria-hidden="true"></i>
+          </div>
+
+          <div class="right-arrow">
+            <i class="fa fa-long-arrow-right text-secondary" style="font-size: 50px;" aria-hidden="true"></i>
+          </div>
+        </div>
+
+        <div class="selected-schools bor">
+          <div class="box-title text-center bor">
+            <h5>دانشکده‌های انتخابی</h5>
+          </div>
+          <div class="selected-schools-list text-right bor">
+            <div class="start-left"></div>
+            {% for row in selected_schools %}
+            <div class="px-2 selected-schools-item item">
+              <p class=' m-0'>{{row}}</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="buttons d-flex m-auto justify-content-end border border-dark w-100">
+
+        <div class="save-button my-auto py-3 ml-3">
+
+          <form class="" action="{% url 'school_selection' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" class="valueList" name="valueList" value="">
+            <button type="submit" name="button" class="btn btn-outline-success">مرحله بعد <i class="fa fa-chevron-left" aria-hidden="true"></i></button>
+          </form>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+  <br>
+
+  <div class="container">
+    <div class="container w-75 d-flex justify-content-between">
+      <div class="previous-page">
+        <a href="#"></a>
+      </div>
+
+      <div class="previous-page">
+        <a href="{% url 'class_selection' %}">كلاس‌ها >></a>
+      </div>
+
+    </div>
+  </div>
+  <br>
+  <br>
+  <br>
+
+  <script>
+    $('.item').click(function() {
+      $(this).toggleClass('select')
+    })
+
+    $('.right-arrow').click(function() {
+
+      let list = $('.selected-schools-list .select')
+      list.each(function(x) {
+        $('.start-right').after(list[x])
+      })
+
+      var items = $('.selected-schools-list p');
+      var valueList = [];
+      for (let i = 0; i < items.length; i++) {
+        valueList.push(items[i].innerHTML)
+      }
+
+      $('.valueList').val(valueList)
+      $('.item').removeClass('select')
+    })
+
+    $('.left-arrow').click(function() {
+
+      let list = $('.total-schools-list .select')
+      list.each(function(x) {
+        $('.start-left').after(list[x])
+      })
+
+      var items = $('.selected-schools-list p');
+      var valueList = [];
+      for (let i = 0; i < items.length; i++) {
+        valueList.push(items[i].innerHTML)
+      }
+
+      $('.valueList').val(valueList)
+      $('.item').removeClass('select')
+    })
+
+    var items = $('.selected-schools-list p');
+    var valueList = [];
+    for (let i = 0; i < items.length; i++) {
+      valueList.push(items[i].innerHTML)
+
+    }
+
+    $('.valueList').val(valueList)
+
+    $(window).scroll(function() {
+      sessionStorage.scrollPos = $(window).scrollTop();
+    });
+    var init = function() {
+      $(window).scrollTop(sessionStorage.scrollPos || 0)
+    };
+    window.onload = init;
+  </script>
+
+  {% endblock%}

@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block style %}
+<style>
+
+  .first-row {
+    font-weight: bold;
+  }
+
+  .update-row {
+    display: none;
+  }
+
+  .hide {
+    visibility: hidden;
+  }
+
+  .buttons {
+    visibility: hidden
+  }
+
+  .buttons:hover {
+    cursor: pointer;
+  }
+
+  .content-row:hover .buttons {
+    visibility: visible;
+  }
+
+  .content-row:hover {
+    background: #DADAD6;
+  }
+
+  .submit-button {
+    border: none;
+    background-color: white;
+  }
+
+  .center {
+    display:flex;
+    justify-content:center;
+    align-items:center
+  }
+
+  /* .class-wrapper {
+    overflow-y:auto;
+  } */
+</style>
+{% endblock %}
+
+{% block content %}
+
+<br>
+<br>
+<div class="container">
+<div class="container w-75 d-flex justify-content-between">
+  <div class="previous-page">
+    <a href="{% url 'school_selection' %}"><< انتخاب دانشكده</a>
+  </div>
+  <div class="next-page">
+    <a href="{% url 'upload' %}">آپلود فايل >></a>
+  </div>
+</div>
+</div>
+
+<br>
+<div class="container">
+<div class="container w-75 wrapper d-flex flex-column bor pb-4">
+  <div class="title d-flex justify-content-center p-5 borb mb-3">
+    <div class="align-self-center">
+      <h2>وارد كردن كلاس‌ها</h2>
+    </div>
+  </div>
+
+  <div class="guide p-1 text-right bor mb-3">
+    <div class="p-2 bor">
+      <h3>راهنما</h3>
+      <p>از سطر اول جدول زیر می‌توانید کلاس‌های مربوط به دانشکده‌هایی که در صفحه قبل انتخاب کردید را تولید کنید. کلاس‌های ایجاد شده در زیر قرار می‌گیرند. با قرار گرفتن ماوس روی هر سطر، دو آیکون در سمت راست و چپ ظاهر می‌شود که امکان حذف و تغییر آن سطر
+        را ایجاد می‌کنند. </p>
+    </div>
+
+  </div>
+  <div class="clsses d-flex">
+    <div class="col"></div>
+
+    <div class="d-flex flex-column justify-content-center py-4 px-3 bor" style="width:530px;">
+      <div class="first-row text-center d-flex w-100 bor" id="goto">
+        <div class="col hide"></div>
+        <div class="col-2 center">ردیف</div>
+        <div class="col-6 center">نام دانشکده</div>
+        <div class="col-2 center">ظرفیت کلاس</div>
+        <div class="col hide"></div>
+      </div>
+
+      <div class="input-row text-center d-flex w-100 mb-3 borb borl borr py-3">
+        <form class="d-flex justify-content-center w-100" action="{% url 'class_selection' %}" method="post">
+          {% csrf_token %}
+          <div class="col hide"></div>
+          <div class="col-2"><button class="submit-button btn btn-outline-success px-1 py-0" type="submit"><i class="fa fa-plus" aria-hidden="true"></i></button></div>
+          <div class="col-6 d-flex justify-content-center">
+            <div class="align-self-center">
+              <select class=" w-100" id="school" name="school">
+                {% if selected_schools %}
+                {% for school in selected_schools %}
+                <option>{{school}}</option>
+                {% endfor %}
+                {% else %}
+                <option>null</option>
+                {% endif %}
+              </select>
+            </div>
+
+          </div>
+          <div class="col-2">
+            <input class="w-100" type="number" id="capacity" name="capacity" min="0" value="0">
+          </div>
+          <div class="col hide"></div>
+        </form>
+      </div>
+      {% if class_list %}
+      <div class="class-wrapper">
+
+
+      {% for i in class_list %}
+      <div class="content-row text-center d-flex w-100 py-2">
+
+        <div class="col"><a href="{% url 'delete_class' pk=i.0.pk %}"><i class="fa fa-trash-o buttons text-danger"></i></a></div>
+        <div class="col-2 class-id">{{i.1}}</div>
+        <div class="col-6 d-flex justify-content-center">
+          <div class="align-self-center">{{i.0.school}}</div>
+        </div>
+        <div class="col-2">{{i.0.capacity}}</div>
+        <div class="col"><a><i class="fa fa-pencil buttons edit" style="color: blue;"></i></a></div>
+
+      </div>
+      <div class="update-row text-center w-100">
+        <form class="d-flex justify-content-center w-100" action="{% url 'update_class' pk=i.0.pk %}" method="post">
+          {% csrf_token %}
+          <div class="col"></div>
+          <div class="col-2"><button type="submit" class="submit-button btn btn-outline-primary px-1 py-0"><i class="fa fa-check" aria-hidden="true"></i></button></div>
+          <div class="col-6 d-flex justify-content-center">
+            <div class="align-self-center">
+              <select class=" w-100" id="school" name="school">
+                <option selected="selected">{{i.0.school}}</option>
+                {% for school in selected_schools %}
+                <option>{{school}}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+          </div>
+          <div class="col-2">
+            <input class="w-75" type="number" id="capacity" name="capacity" min="0" value="{{i.0.capacity}}">
+          </div>
+          <div class="col"></div>
+        </form>
+      </div>
+
+      <hr class="m-0">
+
+      {% endfor %}
+</div>
+      <div class="delete align-self-center mt-4">
+        <a href="{% url 'classDeleteAll' %}" class="btn btn-outline-danger">حذف همه</a>
+      </div>
+
+      {% else %}
+      <div class="text-center w-100 py-2">
+        <h5 class="text-danger">كلاسي اضافه نشده است</h5>
+      </div>
+      {% endif %}
+
+
+
+      <div class="navigation-buttons d-flex justify-content-between w-100 bor mt-3 p-3">
+        <div class="previous-button">
+          <a href="{% url 'school_selection' %}" class="btn btn-outline-success"><i class="fa fa-chevron-right" aria-hidden="true"></i>     مرحله قبل</a>
+        </div>
+
+        <div class="previous-button">
+          <a href="{% url 'upload' %}" class="btn btn-outline-success">مرحله بعد    <i class="fa fa-chevron-left" aria-hidden="true"></i></a>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col"></div>
+
+
+  </div>
+
+</div>
+
+</div>
+<br>
+{% if class_list|length >= 7 %}
+<div class="container">
+<div class="container w-75 d-flex justify-content-between">
+  <div class="previous-page">
+    <a href="{% url 'school_selection' %}"><< انتخاب دانشكده</a>
+  </div>
+  <div class="next-page">
+    <a href="{% url 'upload' %}">آپلود فايل >></a>
+  </div>
+</div>
+</div>
+{% endif %}
+
+{% if request.method == 'POST' or 'change/' in request.path %}
+<script>
+  window.location.hash = '#goto';
+</script>
+{% endif %}
+
+<br>
+<br>
+<br>
+<br>
+
+<script>
+
+</script>
+
+
+
+<script>
+  $('.edit').on('click', function() {
+    $(this).parent().parent().parent().next().toggleClass('d-flex')
+  })
+</script>
+
+<script>
+  $(window).scroll(function() {
+    sessionStorage.scrollPos = $(window).scrollTop();
+  });
+  var init = function() {
+    $(window).scrollTop(sessionStorage.scrollPos || 0)
+  };
+  window.onload = init;
+
+</script>
+
+
+
+{% endblock%}

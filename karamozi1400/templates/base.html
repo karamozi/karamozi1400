@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="rtl">
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <script src="https://use.fontawesome.com/7184de7d64.js"></script> -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+  <link rel="stylesheet" href="{% static 'styles.css' %}" type="text/css">
+  {% block style%}
+  {% endblock %}
+  <title></title>
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand navbar-dark bg-dark sticky-top">
+    <div class="container">
+      <ul class="navbar-nav w-100">
+
+        {% if user.is_authenticated %}
+        <li {% if 'school-selection/' in request.path %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+          <a class="nav-link mx-3" href="{% url 'school_selection' %}">دانشكده</a>
+        </li>
+
+        <li {% if 'class-selection/' in request.path %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+          <a class="nav-link mx-3" href="{% url 'class_selection' %}">كلاس‌ها</a>
+        </li>
+
+        <li {% if 'upload/' in request.path %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+          <a class="nav-link mx-3" href="{% url 'upload' %}">آپلود فایل</a>
+        </li>
+
+        <li {% if 'table/' in request.path %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+          <a class="nav-link mx-3" href="{% url 'table' %}">درس‌ها</a>
+        </li>
+
+        <li {% if 'finalize/' in request.path %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+          <a class="nav-link mx-3" href="{% url 'finalize' %}">نهایی کردن</a>
+        </li>
+
+        <li class="nav-item mr-auto">
+          <a class="nav-link mx-3">{{user}}</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link mx-3" href="{% url 'logout' %}">خروج</a>
+        </li>
+        {% else %}
+
+        <li {% if 'signup/' in request.path %} class="nav-item active mr-auto" {% else %} class="nav-item mr-auto" {% endif %}>
+          <a class="nav-link mx-3" href="{% url 'signup'%}">ثبت نام</a>
+        </li>
+
+        <li {% if 'login/' in request.path %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+          <a class="nav-link mx-3" href="{% url 'login'%}">ورود</a>
+        </li>
+
+        {% endif %}
+
+      </ul>
+    </div>
+
+  </nav>
+
+  {% block content %}
+  {% endblock %}
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+
+</html>

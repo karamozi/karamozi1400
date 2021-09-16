@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block style %}
+
+<style media="screen">
+  .border-color {
+    border: 1px solid #c4c4c4;
+    border-radius:30px;
+  }
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<br>
+
+<div class="container px-5">
+  <div class="container d-flex justify-content-between">
+
+    <div class="previous-page">
+      <a href="{% url 'upload' %}"><< بازگشت به صفحه آپلود</a>
+    </div>
+
+    <div class="next-page">
+      <!-- <a href="{% url 'table' %}">درس‌ها >></a> -->
+    </div>
+  </div>
+
+</div>
+<br>
+
+  <div class="wrapper container w-75 border-color pb-4">
+    <div class="header center">
+      <h3 class="p-4">راهنمای آپلود فایل</h3>
+    </div>
+    <hr class="m-0">
+    <div class="step1 p-2 text-right mt-4">
+      <h5>1- گام اول:</h5>
+      <p>
+        این قسمت از کار کاملا اختیاری می‌باشد. در این قسمت می‌توانید گزارش 110 را آپلود کنید. ابتدا از قسمت آپلود فایل choose file را بزنید و فایل خود را انتخاب کنید و در نهایت upload را بزنید.
+      </p>
+
+      <p>
+        بعلاوه اگر مايل هستيد چند فايل را با هم ادغام كنيد مي‌توانيد تيك اضافه كردن به جدول قبلي را بزنيد. در اين صورت درس‌هاي قبلي حذف نخواهند شد.
+      </p>
+      <div class="center mt-4">
+        <img src="{% static 'step1.gif' %}" alt="" class="w-75">
+      </div>
+    </div>
+
+    <br>
+    <hr class="m-0">
+    <div class="step2 p-2 text-right mt-4">
+      <h5>2- گام دوم:</h5>
+      <p>
+        در قسمت راست هر سطر يك چك باكس وجود دارد. مي‌توانيد هر چند گزينه را به دلخواه انتخاب كنيد و در نهايت گزينه حذف درس‌هاي انتخاب شده را بزنيد. با اين كار درس‌هاي تيك زده شده حذف خواهند شد. در نهايت به مرحله بعد برويد.
+      </p>
+
+      <div class="center mt-4">
+        <img src="{% static 'step2.gif' %}" alt="" class="w-75">
+      </div>
+    </div>
+    <div class="step3"></div>
+
+  </div>
+  <br>
+
+  <div class="container px-5">
+    <div class="container d-flex justify-content-between">
+
+      <div class="previous-page">
+        <a href="{% url 'upload' %}"><< بازگشت به صفحه آپلود</a>
+      </div>
+
+      <div class="next-page">
+        <!-- <a href="{% url 'table' %}">درس‌ها >></a> -->
+      </div>
+    </div>
+
+  </div>
+
+  <br>
+  <br>
+
+
+{% endblock %}
