@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from accounts import views
+from OPTapp import views
 
 
 urlpatterns = [
