@@ -4,10 +4,10 @@ from django.http import HttpResponseRedirect, HttpResponse,JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from openpyxl import Workbook, load_workbook, styles
-from accounts.models import Schools, Classes, Table
+from OPTapps.models import Schools, Classes, Table
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
-from accounts.forms import UploadFileForm
+from OPTapps.forms import UploadFileForm
 from django.core import validators
 from django.conf import settings
 from django.urls import reverse
